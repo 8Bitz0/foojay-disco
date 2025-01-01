@@ -1,0 +1,8 @@
+[package]
+name = "foojay-disco-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.23", features = ["derive"] }
+foojay_disco = { path = "../" }
