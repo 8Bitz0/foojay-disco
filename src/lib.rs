@@ -1,4 +1,5 @@
 mod http;
+mod major_versions;
 mod package;
 
 #[derive(Debug, thiserror::Error)]
@@ -13,5 +14,5 @@ pub enum Error {
     JsonParse(serde_json::Error),
 }
 
-pub use http::{QueryOptions, pull};
+pub use http::{PackageQueryOptions, MajorVersionsQueryOptions, pull_packages, pull_major_versions};
 pub use package::{PackageList, Package, Feature};

@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use foojay_disco::QueryOptions;
+use foojay_disco::{PackageQueryOptions, MajorVersionsQueryOptions};
 
 const FOOJAY_URL_VAR: &str = "FOOJAY_DISCO_API_URL";
 
@@ -12,7 +12,7 @@ struct Args {
 
 #[derive(Debug, Subcommand)]
 enum Command {
-    Pull {
+    PullPackages {
         #[arg(short = 'p', long)]
         print: bool,
         #[arg(long)]
@@ -42,13 +42,23 @@ enum Command {
         #[arg(long)]
         latest: Option<String>,
     },
+    PullMajorVersions {
+        #[arg(short = 'p', long)]
+        print: bool,
+        #[arg(long)]
+        early_access: Option<bool>,
+        #[arg(long)]
+        general_availability: Option<bool>,
+        #[arg(long)]
+        maintained: Option<bool>,
+    },
 }
 
 fn main() {
     let args = Args::parse();
 
     match args.command {
-        Command::Pull {
+        Command::PullPackages {
             print,
             version,
             distribution,
@@ -66,7 +76,7 @@ fn main() {
         } => {
             println!("Pulling packages...");
             
-            let packages = foojay_disco::pull(std::env::var_os(FOOJAY_URL_VAR).and_then(|u| u.to_str().map(String::from)), Some(QueryOptions {
+            let packages = foojay_disco::pull_packages(std::env::var_os(FOOJAY_URL_VAR).and_then(|u| u.to_str().map(String::from)), Some(PackageQueryOptions {
                 version,
                 distribution,
                 architecture,
@@ -114,6 +124,34 @@ fn main() {
 
             if print {
                 println!("{:#?}", packages);
+            }
+        }
+        Command::PullMajorVersions {
+            print,
+            early_access,
+            general_availability,
+            maintained,
+        } => {
+            println!("Pulling major versions...");
+
+            let major_versions = foojay_disco::pull_major_versions(std::env::var_os(FOOJAY_URL_VAR).and_then(|u| u.to_str().map(String::from)), Some(MajorVersionsQueryOptions {
+                early_access,
+                general_availability,
+                maintained,
+            })).unwrap();
+
+            let mut major_version_names = vec![];
+
+            for v in &major_versions.result {
+                if !major_version_names.contains(&v.major_version) {
+                    major_version_names.push(v.major_version)
+                }
+            }
+
+            println!("Major Versions: {:?}", major_version_names);
+
+            if print {
+                println!("{:#?}", major_versions);
             }
         }
     }
