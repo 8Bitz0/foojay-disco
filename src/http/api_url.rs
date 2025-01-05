@@ -158,6 +158,32 @@ pub fn create_major_versions_query_url(
     Ok(query_url.to_string())
 }
 
+pub fn create_distributions_query_url(
+    base: impl std::fmt::Display,
+) -> Result<String, Error> {
+    let mut query_url = Url::parse(base.to_string().as_str())
+        .map_err(Error::UrlParse)?;
+
+    query_url = query_url.join("v3.0/").map_err(Error::UrlParse)?;
+    query_url = query_url.join("distributions").map_err(Error::UrlParse)?;
+
+    Ok(query_url.to_string())
+}
+
+pub fn create_distribution_info_query_url(
+    base: impl std::fmt::Display,
+    distribution: String,
+) -> Result<String, Error> {
+    let mut query_url = Url::parse(base.to_string().as_str())
+        .map_err(Error::UrlParse)?;
+
+    query_url = query_url.join("v3.0/").map_err(Error::UrlParse)?;
+    query_url = query_url.join("distributions/").map_err(Error::UrlParse)?;
+    query_url = query_url.join(&distribution).map_err(Error::UrlParse)?;
+
+    Ok(query_url.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -203,6 +229,31 @@ mod tests {
         assert_eq!(
             query_url,
             format!("{}v3.0/major_versions?ea=true&ga=true&maintained=true", crate::http::API_DEFAULT_URL),
+        )
+    }
+
+    #[test]
+    fn create_distributions_query_url_test() {
+        let query_url = create_distributions_query_url(
+            crate::http::API_DEFAULT_URL,
+        ).unwrap();
+
+        assert_eq!(
+            query_url,
+            format!("{}v3.0/distributions", crate::http::API_DEFAULT_URL),
+        )
+    }
+
+    #[test]
+    fn create_distribution_info_query_url_test() {
+        let query_url = create_distribution_info_query_url(
+            crate::http::API_DEFAULT_URL,
+            "oracle_open_jdk".to_string(),
+        ).unwrap();
+
+        assert_eq!(
+            query_url,
+            format!("{}v3.0/distributions/oracle_open_jdk", crate::http::API_DEFAULT_URL),
         )
     }
 }

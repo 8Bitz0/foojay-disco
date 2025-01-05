@@ -12,7 +12,7 @@ struct Args {
 
 #[derive(Debug, Subcommand)]
 enum Command {
-    PullPackages {
+    Packages {
         #[arg(short = 'p', long)]
         print: bool,
         #[arg(long)]
@@ -42,7 +42,7 @@ enum Command {
         #[arg(long)]
         latest: Option<String>,
     },
-    PullMajorVersions {
+    MajorVersions {
         #[arg(short = 'p', long)]
         print: bool,
         #[arg(long)]
@@ -52,13 +52,22 @@ enum Command {
         #[arg(long)]
         maintained: Option<bool>,
     },
+    Distributions {
+        #[arg(short = 'p', long)]
+        print: bool,
+    },
+    DistributionInfo {
+        distribution: String,
+        #[arg(short = 'p', long)]
+        print: bool,
+    }
 }
 
 fn main() {
     let args = Args::parse();
 
     match args.command {
-        Command::PullPackages {
+        Command::Packages {
             print,
             version,
             distribution,
@@ -126,7 +135,7 @@ fn main() {
                 println!("{:#?}", packages);
             }
         }
-        Command::PullMajorVersions {
+        Command::MajorVersions {
             print,
             early_access,
             general_availability,
@@ -144,7 +153,7 @@ fn main() {
 
             for v in &major_versions.result {
                 if !major_version_names.contains(&v.major_version) {
-                    major_version_names.push(v.major_version)
+                    major_version_names.push(v.major_version);
                 }
             }
 
@@ -152,6 +161,50 @@ fn main() {
 
             if print {
                 println!("{:#?}", major_versions);
+            }
+        }
+        Command::Distributions {
+            print,
+        } => {
+            println!("Pulling distributions...");
+
+            let distributions = foojay_disco::pull_distributions(std::env::var_os(FOOJAY_URL_VAR).and_then(|u| u.to_str().map(String::from))).unwrap();
+
+            let mut distribution_names = vec![];
+
+            for v in &distributions.result {
+                if !distribution_names.contains(&v.name) {
+                    distribution_names.push(v.name.clone());
+                }
+            }
+
+            println!("Distribution Names: {:?}", distribution_names);
+
+            if print {
+                println!("{:#?}", distributions);
+            }
+        }
+        Command::DistributionInfo {
+            distribution,
+            print,
+        } => {
+            println!("Pulling distribution info...");
+
+            let distribution_info = foojay_disco::pull_distribution_info(
+                std::env::var_os(FOOJAY_URL_VAR).and_then(|u| u.to_str().map(String::from)),
+                distribution,
+            ).unwrap();
+
+            println!("Distribution Name: {:?}", distribution_info.result[0].name);
+            println!("Maintained: {:?}", distribution_info.result[0].maintained);
+            println!("Available: {:?}", distribution_info.result[0].available);
+            println!("Build of OpenJDK: {:?}", distribution_info.result[0].build_of_openjdk);
+            println!("Build of GraalVM: {:?}", distribution_info.result[0].build_of_graalvm);
+            println!("Official URL: {:?}", distribution_info.result[0].official_uri);
+            println!("Versions: {:?}", distribution_info.result[0].versions);
+
+            if print {
+                println!("{:#?}", distribution_info);
             }
         }
     }
