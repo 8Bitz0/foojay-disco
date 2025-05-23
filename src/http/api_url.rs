@@ -142,6 +142,20 @@ pub fn create_package_query_url(
     Ok(query_url.to_string())
 }
 
+pub fn create_package_info_query_url(
+    base: impl std::fmt::Display,
+    package: String,
+) -> Result<String, Error> {
+    let mut query_url = Url::parse(base.to_string().as_str())
+        .map_err(Error::UrlParse)?;
+
+    query_url = query_url.join("v3.0/").map_err(Error::UrlParse)?;
+    query_url = query_url.join("ids/").map_err(Error::UrlParse)?;
+    query_url = query_url.join(&package).map_err(Error::UrlParse)?;
+
+    Ok(query_url.to_string())
+}
+
 pub fn create_major_versions_query_url(
     base: impl std::fmt::Display,
     options: Option<MajorVersionsQueryOptions>,
@@ -212,6 +226,19 @@ mod tests {
         assert_eq!(
             query_url,
             format!("{}v3.0/packages?version=17&distribution=corretto&architecture=x86&archive_type=tar.gz&package_type=jdk&operating_system=linux&libc_type=glibc&release_status=ga&term_of_support=lts&bitness=32&javafx_bundled=false&directly_downloadable=true&latest=per-distro", crate::http::API_DEFAULT_URL),
+        )
+    }
+
+    #[test]
+    fn create_package_info_query_url_test() {
+        let query_url = create_package_info_query_url(
+            crate::http::API_DEFAULT_URL,
+            "2dd07b11553c798fa49274d937ba88e9".to_string(),
+        ).unwrap();
+
+        assert_eq!(
+            query_url,
+            format!("{}v3.0/ids/2dd07b11553c798fa49274d937ba88e9", crate::http::API_DEFAULT_URL),
         )
     }
 

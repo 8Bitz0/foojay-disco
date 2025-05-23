@@ -37,6 +37,23 @@ pub struct Package {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct PackageInfo {
+    pub result: [PackageInfoInner; 1],
+    pub message: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct PackageInfoInner {
+    pub filename: String,
+    pub direct_download_uri: String,
+    pub download_site_uri: String,
+    pub signature_uri: String,
+    pub checksum_uri: String,
+    pub checksum: String,
+    pub checksum_type: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Feature {
     pub name: String,
     pub ui_string: String,
@@ -44,6 +61,12 @@ pub struct Feature {
 }
 
 impl PackageList {
+    pub fn decode(json: String) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(&json)
+    }
+}
+
+impl PackageInfo {
     pub fn decode(json: String) -> Result<Self, serde_json::Error> {
         serde_json::from_str(&json)
     }

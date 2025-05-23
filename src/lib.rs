@@ -15,7 +15,15 @@ pub enum Error {
     JsonParse(serde_json::Error),
 }
 
-pub use http::{PackageQueryOptions, MajorVersionsQueryOptions, pull_distribution_info, pull_distributions, pull_major_versions, pull_packages};
+pub use http::{
+    PackageQueryOptions,
+    MajorVersionsQueryOptions,
+    pull_distribution_info,
+    pull_distributions,
+    pull_major_versions,
+    pull_packages,
+    pull_package_info,
+};
 pub use distributions::{DistributionList, DistributionInfo, Distribution};
 pub use major_versions::{MajorVersionList, MajorVersion};
-pub use package::{PackageList, Package, Feature};
+pub use package::{PackageList, Package, Feature, PackageInfo, PackageInfoInner};

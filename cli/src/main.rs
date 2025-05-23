@@ -42,6 +42,11 @@ enum Command {
         #[arg(long)]
         latest: Option<String>,
     },
+    PackageInfo {
+        package: String,
+        #[arg(short = 'p', long)]
+        print: bool,
+    },
     MajorVersions {
         #[arg(short = 'p', long)]
         print: bool,
@@ -133,6 +138,26 @@ fn main() {
 
             if print {
                 println!("{:#?}", packages);
+            }
+        }
+        Command::PackageInfo {
+            package,
+            print,
+        } => {
+            println!("Pulling package info...");
+            
+            let package = foojay_disco::pull_package_info(std::env::var_os(FOOJAY_URL_VAR).and_then(|u| u.to_str().map(String::from)), package).unwrap();
+
+            println!("Filename: {}", package.result[0].filename);
+            println!("Direct Download URI: {}", package.result[0].direct_download_uri);
+            println!("Download Site URI: {}", package.result[0].download_site_uri);
+            println!("Signature URI: {}", package.result[0].signature_uri);
+            println!("Checksum URI: {}", package.result[0].checksum_uri);
+            println!("Checksum: {}", package.result[0].checksum);
+            println!("Checksum Type: {}", package.result[0].checksum_type);
+
+            if print {
+                println!("{:#?}", package);
             }
         }
         Command::MajorVersions {
